@@ -1,0 +1,149 @@
+<!-- Profile Page -->
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">My Profile</h1>
+  </div>
+
+  <% if (success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      Profile updated successfully!
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Profile Information</h6>
+        </div>
+        <div class="card-body">
+          <form action="/profile/update" method="POST">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" value="<%= userProfile.username %>" disabled>
+              <small class="form-text text-muted">Username cannot be changed</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="<%= userProfile.email %>" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="fullName" name="fullName" value="<%= userProfile.full_name %>">
+            </div>
+            
+            <div class="mb-3">
+              <label for="role" class="form-label">Role</label>
+              <input type="text" class="form-control" id="role" value="<%= userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1) %>" disabled>
+            </div>
+            
+            <div class="mb-3">
+              <label for="timezone" class="form-label">Timezone</label>
+              <select class="form-select" id="timezone" name="timezone">
+                <option value="UTC" <%= userProfile.timezone === 'UTC' ? 'selected' : '' %>>UTC</option>
+                <option value="America/New_York" <%= userProfile.timezone === 'America/New_York' ? 'selected' : '' %>>Eastern Time (ET)</option>
+                <option value="America/Chicago" <%= userProfile.timezone === 'America/Chicago' ? 'selected' : '' %>>Central Time (CT)</option>
+                <option value="America/Denver" <%= userProfile.timezone === 'America/Denver' ? 'selected' : '' %>>Mountain Time (MT)</option>
+                <option value="America/Los_Angeles" <%= userProfile.timezone === 'America/Los_Angeles' ? 'selected' : '' %>>Pacific Time (PT)</option>
+                <option value="Europe/London" <%= userProfile.timezone === 'Europe/London' ? 'selected' : '' %>>London</option>
+                <option value="Europe/Paris" <%= userProfile.timezone === 'Europe/Paris' ? 'selected' : '' %>>Paris</option>
+                <option value="Asia/Tokyo" <%= userProfile.timezone === 'Asia/Tokyo' ? 'selected' : '' %>>Tokyo</option>
+                <option value="Asia/Singapore" <%= userProfile.timezone === 'Asia/Singapore' ? 'selected' : '' %>>Singapore</option>
+                <option value="Australia/Sydney" <%= userProfile.timezone === 'Australia/Sydney' ? 'selected' : '' %>>Sydney</option>
+              </select>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Change Password</h6>
+        </div>
+        <div class="card-body">
+          <form action="/profile/update" method="POST">
+            <input type="hidden" name="email" value="<%= userProfile.email %>">
+            <input type="hidden" name="fullName" value="<%= userProfile.full_name %>">
+            <input type="hidden" name="timezone" value="<%= userProfile.timezone %>">
+            
+            <div class="mb-3">
+              <label for="currentPassword" class="form-label">Current Password</label>
+              <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword" required>
+              <div class="invalid-feedback">Passwords do not match</div>
+            </div>
+            
+            <div class="d-grid">
+              <button type="submit" class="btn btn-danger" id="changePasswordBtn">
+                <i class="fas fa-key"></i> Change Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    
+    // Check if passwords match
+    function checkPasswordsMatch() {
+      if (confirmPasswordInput.value === '') {
+        confirmPasswordInput.classList.remove('is-invalid');
+        return;
+      }
+      
+      if (newPasswordInput.value !== confirmPasswordInput.value) {
+        confirmPasswordInput.classList.add('is-invalid');
+        changePasswordBtn.disabled = true;
+      } else {
+        confirmPasswordInput.classList.remove('is-invalid');
+        changePasswordBtn.disabled = false;
+      }
+    }
+    
+    newPasswordInput.addEventListener('input', checkPasswordsMatch);
+    confirmPasswordInput.addEventListener('input', checkPasswordsMatch);
+    
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+      });
+    }, 5000);
+  });
+</script> 

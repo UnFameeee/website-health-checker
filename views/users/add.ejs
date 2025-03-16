@@ -1,0 +1,101 @@
+<!-- Add User Page -->
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Add User</h1>
+    <a href="/users" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Back to Users
+    </a>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">User Information</h6>
+        </div>
+        <div class="card-body">
+          <% if (error) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <form action="/users" method="POST">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username *</label>
+              <input type="text" class="form-control" id="username" name="username" 
+                     value="<%= locals.formData ? formData.username : '' %>" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">Email *</label>
+              <input type="email" class="form-control" id="email" name="email" 
+                     value="<%= locals.formData ? formData.email : '' %>" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Password *</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="fullName" name="fullName" 
+                     value="<%= locals.formData ? formData.fullName : '' %>">
+            </div>
+            
+            <div class="mb-3">
+              <label for="role" class="form-label">Role</label>
+              <select class="form-select" id="role" name="role">
+                <option value="user" <%= locals.formData && formData.role === 'user' ? 'selected' : '' %>>User</option>
+                <option value="admin" <%= locals.formData && formData.role === 'admin' ? 'selected' : '' %>>Admin</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="timezone" class="form-label">Timezone</label>
+              <select class="form-select" id="timezone" name="timezone">
+                <option value="UTC" <%= !locals.formData || formData.timezone === 'UTC' ? 'selected' : '' %>>UTC</option>
+                <option value="America/New_York" <%= locals.formData && formData.timezone === 'America/New_York' ? 'selected' : '' %>>Eastern Time (ET)</option>
+                <option value="America/Chicago" <%= locals.formData && formData.timezone === 'America/Chicago' ? 'selected' : '' %>>Central Time (CT)</option>
+                <option value="America/Denver" <%= locals.formData && formData.timezone === 'America/Denver' ? 'selected' : '' %>>Mountain Time (MT)</option>
+                <option value="America/Los_Angeles" <%= locals.formData && formData.timezone === 'America/Los_Angeles' ? 'selected' : '' %>>Pacific Time (PT)</option>
+                <option value="Europe/London" <%= locals.formData && formData.timezone === 'Europe/London' ? 'selected' : '' %>>London</option>
+                <option value="Europe/Paris" <%= locals.formData && formData.timezone === 'Europe/Paris' ? 'selected' : '' %>>Paris</option>
+                <option value="Asia/Tokyo" <%= locals.formData && formData.timezone === 'Asia/Tokyo' ? 'selected' : '' %>>Tokyo</option>
+                <option value="Asia/Singapore" <%= locals.formData && formData.timezone === 'Asia/Singapore' ? 'selected' : '' %>>Singapore</option>
+                <option value="Australia/Sydney" <%= locals.formData && formData.timezone === 'Australia/Sydney' ? 'selected' : '' %>>Sydney</option>
+              </select>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save User
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Help</h6>
+        </div>
+        <div class="card-body">
+          <p>Fields marked with * are required.</p>
+          <p><strong>Username:</strong> Unique identifier for the user.</p>
+          <p><strong>Email:</strong> User's email address for notifications.</p>
+          <p><strong>Password:</strong> Secure password for account access.</p>
+          <p><strong>Role:</strong> User role determines permissions.</p>
+          <ul>
+            <li><strong>User:</strong> Can manage their own websites.</li>
+            <li><strong>Admin:</strong> Can manage all websites and users.</li>
+          </ul>
+          <p><strong>Timezone:</strong> User's preferred timezone for displaying dates and times.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

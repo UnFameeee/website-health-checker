@@ -1,0 +1,173 @@
+<!-- Settings Page -->
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">System Settings</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSettingModal">
+      <i class="fas fa-plus"></i> Add Setting
+    </button>
+  </div>
+
+  <% if (success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      Settings updated successfully!
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+
+  <% 
+  // Define category display names
+  const categoryNames = {
+    'general': 'General',
+    'email': 'Email Notifications',
+    'monitoring': 'Monitoring',
+    'security': 'Security',
+    'ui': 'User Interface'
+  };
+  
+  // Define category icons
+  const categoryIcons = {
+    'general': 'fa-cog',
+    'email': 'fa-envelope',
+    'monitoring': 'fa-chart-line',
+    'security': 'fa-shield-alt',
+    'ui': 'fa-palette'
+  };
+  %>
+
+  <div class="row">
+    <% Object.keys(groupedSettings).forEach(category => { %>
+      <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+              <i class="fas <%= categoryIcons[category] || 'fa-cog' %> me-2"></i>
+              <%= categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1) %> Settings
+            </h6>
+          </div>
+          <div class="card-body">
+            <% groupedSettings[category].forEach(setting => { %>
+              <form action="/settings/<%= setting.key %>" method="POST" class="mb-4">
+                <div class="mb-3">
+                  <label for="<%= setting.key %>" class="form-label fw-bold">
+                    <%= setting.key.split('_').slice(1).join(' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                  </label>
+                  <div class="input-group">
+                    <% if (setting.value === 'true' || setting.value === 'false') { %>
+                      <select class="form-select" id="<%= setting.key %>" name="value">
+                        <option value="true" <%= setting.value === 'true' ? 'selected' : '' %>>Enabled</option>
+                        <option value="false" <%= setting.value === 'false' ? 'selected' : '' %>>Disabled</option>
+                      </select>
+                    <% } else if (!isNaN(setting.value) && setting.value.indexOf('.') === -1) { %>
+                      <input type="number" class="form-control" id="<%= setting.key %>" name="value" value="<%= setting.value %>">
+                    <% } else { %>
+                      <input type="text" class="form-control" id="<%= setting.key %>" name="value" value="<%= setting.value %>">
+                    <% } %>
+                    <button class="btn btn-primary" type="submit">
+                      <i class="fas fa-save"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#deleteSettingModal"
+                            data-setting-key="<%= setting.key %>"
+                            data-setting-name="<%= setting.key.split('_').slice(1).join(' ').replace(/\b\w/g, l => l.toUpperCase()) %>">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  <small class="form-text text-muted"><%= setting.description %></small>
+                </div>
+              </form>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<!-- Add Setting Modal -->
+<div class="modal fade" id="addSettingModal" tabindex="-1" aria-labelledby="addSettingModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addSettingModalLabel">Add New Setting</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/settings" method="POST">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="key" class="form-label">Key *</label>
+            <input type="text" class="form-control" id="key" name="key" required 
+                   placeholder="e.g., email_smtp_host">
+            <small class="form-text text-muted">Use format: category_name_of_setting</small>
+          </div>
+          <div class="mb-3">
+            <label for="value" class="form-label">Value *</label>
+            <input type="text" class="form-control" id="value" name="value" required>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Setting</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Setting Modal -->
+<div class="modal fade" id="deleteSettingModal" tabindex="-1" aria-labelledby="deleteSettingModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteSettingModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the setting <span id="deleteSettingName"></span>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteSettingForm" action="/settings/delete/" method="POST">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete modal
+    const deleteSettingModal = document.getElementById('deleteSettingModal');
+    if (deleteSettingModal) {
+      deleteSettingModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const settingKey = button.getAttribute('data-setting-key');
+        const settingName = button.getAttribute('data-setting-name');
+        
+        document.getElementById('deleteSettingName').textContent = settingName;
+        document.getElementById('deleteSettingForm').action = `/settings/delete/${settingKey}`;
+      });
+    }
+    
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+      });
+    }, 5000);
+  });
+</script> 

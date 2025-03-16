@@ -1,0 +1,200 @@
+<%- contentFor('body') %>
+
+<div class="row mb-4">
+    <div class="col-md-12 text-center">
+        <h1 class="display-5 mb-2">System Status</h1>
+        <p class="lead text-muted">Current status of our monitored services</p>
+    </div>
+</div>
+
+<!-- Overall Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Overall Status</h6>
+                <% if (overallStats.websitesDown === 0) { %>
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                    <h4 class="mb-0 text-success">All Systems Operational</h4>
+                <% } else { %>
+                    <div class="bg-danger bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                        <i class="fas fa-exclamation-circle fa-3x text-danger"></i>
+                    </div>
+                    <h4 class="mb-0 text-danger">Partial System Outage</h4>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Monitored Services</h6>
+                <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                    <i class="fas fa-globe fa-3x text-primary"></i>
+                </div>
+                <h4 class="mb-0"><%= overallStats.totalWebsites %></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Overall Uptime</h6>
+                <div class="bg-info bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                    <i class="fas fa-chart-line fa-3x text-info"></i>
+                </div>
+                <h4 class="mb-0"><%= overallStats.overallUptime %>%</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Current Outages</h6>
+                <div class="bg-<%= overallStats.websitesDown > 0 ? 'danger' : 'success' %> bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                    <i class="fas fa-<%= overallStats.websitesDown > 0 ? 'times-circle' : 'check-circle' %> fa-3x text-<%= overallStats.websitesDown > 0 ? 'danger' : 'success' %>"></i>
+                </div>
+                <h4 class="mb-0"><%= overallStats.websitesDown %></h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services Status -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Services Status</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th>Uptime</th>
+                        <th>Response Time</th>
+                        <th>Last Checked</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% websiteStats.forEach(website => { %>
+                        <tr>
+                            <td>
+                                <a href="/status/website/<%= website.id %>" class="text-decoration-none fw-medium">
+                                    <%= website.name %>
+                                </a>
+                            </td>
+                            <td>
+                                <% if (website.status === 'up') { %>
+                                    <span class="badge bg-success">Operational</span>
+                                <% } else { %>
+                                    <span class="badge bg-danger">Outage</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 6px">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: <%= website.uptime %>%" aria-valuenow="<%= website.uptime %>" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <span class="text-muted small"><%= website.uptime %>%</span>
+                                </div>
+                            </td>
+                            <td><%= website.avgResponseTime ? `${website.avgResponseTime}ms` : 'N/A' %></td>
+                            <td><%= website.lastCheckTime %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Incident History -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Incidents</h5>
+        <span class="badge bg-secondary">Last 24 hours</span>
+    </div>
+    <div class="card-body">
+        <% 
+        // Define incidents as an empty array if it's not provided
+        const incidentsList = typeof incidents !== 'undefined' ? incidents : [];
+        if (incidentsList.length > 0) { 
+        %>
+            <div class="timeline">
+                <% incidentsList.forEach(incident => { %>
+                    <div class="timeline-item">
+                        <div class="timeline-marker <%= incident.resolved ? 'bg-success' : 'bg-danger' %>"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">
+                                <%= incident.title %>
+                                <% if (incident.resolved) { %>
+                                    <span class="badge bg-success ms-2">Resolved</span>
+                                <% } else { %>
+                                    <span class="badge bg-danger ms-2">Ongoing</span>
+                                <% } %>
+                            </h6>
+                            <p class="text-muted mb-0">
+                                <%= incident.description %>
+                            </p>
+                            <small class="text-muted">
+                                <%= moment(incident.timestamp).format('MMMM D, YYYY h:mm A') %>
+                            </small>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle me-2"></i> No incidents reported in the last 24 hours.
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- contentFor('extraCSS') %>
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 9px;
+        height: 100%;
+        width: 2px;
+        background-color: #e9ecef;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        top: 5px;
+        left: -30px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+    }
+    
+    .custom-progress {
+        height: 6px;
+    }
+    
+    .progress-width {
+        width: attr(data-width);
+    }
+</style> 

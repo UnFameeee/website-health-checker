@@ -1,0 +1,164 @@
+<%- contentFor('body') %>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="h3 mb-0">Reports</h1>
+        <p class="text-muted">Generate and view reports for your websites</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <% if (websites.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Website</th>
+                                    <th>URL</th>
+                                    <th>Status</th>
+                                    <th>Uptime</th>
+                                    <th>Reports</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% websites.forEach(website => { %>
+                                    <tr>
+                                        <td>
+                                            <a href="/websites/<%= website.id %>" class="text-decoration-none fw-medium">
+                                                <%= website.name %>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="<%= website.url %>" target="_blank" class="text-decoration-none">
+                                                <%= website.url %>
+                                                <i class="fas fa-external-link-alt fa-xs ms-1"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <% if (website.last_status === 'up') { %>
+                                                <span class="badge bg-success">Up</span>
+                                            <% } else if (website.last_status === 'down') { %>
+                                                <span class="badge bg-danger">Down</span>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary">Unknown</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 6px; width: 100px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: <%= website.uptime %>%"></div>
+                                            </div>
+                                            <small class="text-muted"><%= website.uptime %>%</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="/reports/uptime/<%= website.id %>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-chart-line me-1"></i>Uptime
+                                                </a>
+                                                <a href="/reports/response-time/<%= website.id %>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-tachometer-alt me-1"></i>Response Time
+                                                </a>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fas fa-download me-1"></i>Export
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <a class="dropdown-item" href="/reports/export/uptime/<%= website.id %>">
+                                                                <i class="fas fa-file-csv me-2"></i>Uptime Data (CSV)
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="/reports/export/response-time/<%= website.id %>">
+                                                                <i class="fas fa-file-csv me-2"></i>Response Time Data (CSV)
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+                        <h4>No websites found</h4>
+                        <p class="text-muted">You haven't added any websites to monitor yet.</p>
+                        <a href="/websites/add" class="btn btn-primary mt-3">
+                            <i class="fas fa-plus me-2"></i>Add Website
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Report Types</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-chart-line fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Uptime Reports</h5>
+                        <p class="text-muted mb-0">View detailed uptime statistics for your websites, including uptime percentage, outages, and downtime duration.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-tachometer-alt fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Response Time Reports</h5>
+                        <p class="text-muted mb-0">Analyze response time trends for your websites, including average, minimum, and maximum response times.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-file-csv fa-2x text-success"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Data Export</h5>
+                        <p class="text-muted mb-0">Export your monitoring data in CSV format for further analysis or record-keeping.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Report Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li class="mb-2">Use the time range selector to view data for different periods (24 hours, 7 days, 30 days).</li>
+                    <li class="mb-2">Export your data regularly for backup and offline analysis.</li>
+                    <li class="mb-2">Compare response times across different time periods to identify performance trends.</li>
+                    <li class="mb-2">Monitor uptime reports to ensure your SLA (Service Level Agreement) commitments are being met.</li>
+                    <li>Use the CSV export feature to create custom reports in spreadsheet applications.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div> 

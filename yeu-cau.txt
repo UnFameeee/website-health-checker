@@ -1,0 +1,53 @@
+Dưới đây là danh sách các yêu cầu cho việc tạo một website kiểm tra uptime của các trang web. Gọi app này là "Website Health Monitor"
+Máy tôi đang sử dụng là Window 11. Default terminal của tôi là Git-Bash.
+
+Technical Requirement:
+- Sử dụng MySQL, EJS, ExpressJS, Bootstrap
+- Sử dụng Code First, có lệnh npm run init-db để add migration
+- Cấu trúc folder sẽ bao gồm: "Utils, service, controller, route, views, database, assets", tất cả những gì liên quan đến database sẽ được lưu vào trong folder database, khi API gọi đến sẽ đi theo flow sau server.js -> route -> controller -> service -> database
+- các table luôn luôn sẽ có cột created_at, updated_at, deleted_at, deleted, và tên của table sẽ được đặt theo dạng "tên_bảng" và là tiếng anh. Các cột ID mặc định sẽ sử dụng GUID
+- table user sẽ có cờ is_active (true/false) và timezone.
+- sẽ có table setting (key, value, description) để lưu các setting của hệ thống (và chỉ có admin được vào và sửa đổi)
+- Có file env, và lưu ý tất cả các AI prompt (AI prompt là master prompt sẽ cover đi user-prompt) sẽ được lưu vào trong file env.
+- Có sử dụng JWT token để xác thực người dùng, chỉ sử dụng access_token. access_token sẽ được lưu vào local storage, và không cần sử dụng gì liên quan đến cookie. Khi access_token hết hạn thì sẽ redirect người dùng về trang login và xóa token đó đi.
+- Tất cả các logic liên quan đến AI sẽ sử dụng dùng API (axois) để gọi đến endpoint
+- UI/UX sẽ được sử dụng bootstrap, giao diện đẹp mắt, hiện đại, màu chủ đạo là #72d1a8
+- Tất cả các trang sẽ có header, footer, sidebar.
+- Tất cả các table UI/UX của hệ thống sẽ có filter, sort, pagination, search, và các cột sẽ được tự động wrap text.
+- Sẽ có 1 script để tự động gen 1 account Admin bằng cách chạy lệnh "npm run admin-script"
+
+
+UI/UX Requirement:
+- Bắt buộc phải có login/logout để access vào trang
+- Có header, footer trên tất cả các trang. Footer sẽ có các icon connection (Github, Linkedn), © [Current-Year] [App-name]. All rights reserved, và Made with <3 by Thangnpq
+
+
+Logical Requirement:
+- Khả năng thêm và quản lý nhiều website cần giám sát
+- Thiết lập khoảng thời gian kiểm tra (từ 1 phút đến 60 phút)
+- Giám sát thời gian phản hồi của server (response time)
+- Theo dõi thời gian downtime của website
+- Cảnh báo khi phát hiện website không hoạt động
+- Tạo trang trạng thái (status page) hiển thị tình trạng các website
+- Hiển thị tỷ lệ uptime theo các khoảng thời gian (24 giờ, 7 ngày, 30 ngày)
+
+Hệ thống cảnh báo:
+- Thông báo qua nhiều kênh (email)
+- Khả năng tùy chỉnh ngưỡng cảnh báo
+- Tùy chỉnh mức độ ưu tiên cho các cảnh báo khác nhau
+
+Báo cáo và phân tích:
+- Bảng điều khiển (dashboard) hiển thị trực quan dữ liệu uptime
+- Báo cáo hàng ngày về tình trạng uptime
+
+Tính năng kỹ thuật:
+- Kiểm tra từ nhiều vị trí địa lý khác nhau trên thế giới
+- API để tích hợp với các hệ thống khác
+- Bảo mật thông tin đăng nhập và dữ liệu giám sát
+- Khả năng mở rộng để theo dõi nhiều website khi nhu cầu tăng lên
+
+Giao diện người dùng
+- Giao diện trực quan, dễ sử dụng
+- Bảng điều khiển tùy chỉnh theo nhu cầu người dùng
+- Hiển thị trạng thái hiện tại của tất cả các website được giám sát
+- Khả năng tạo menu tùy chỉnh để quản lý các tính năng

@@ -1,0 +1,578 @@
+<%- contentFor('body') %>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="h3 mb-0"><%= website.name %></h1>
+        <p class="text-muted">
+            <a href="<%= website.url %>" target="_blank" class="text-decoration-none">
+                <%= website.url %>
+                <i class="fas fa-external-link-alt fa-xs ms-1"></i>
+            </a>
+        </p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="/websites/check/<%= website.id %>" class="btn btn-outline-primary me-2">
+            <i class="fas fa-sync me-2"></i>Check Now
+        </a>
+        <a href="/websites/edit/<%= website.id %>" class="btn btn-primary">
+            <i class="fas fa-edit me-2"></i>Edit
+        </a>
+    </div>
+</div>
+
+<!-- Status Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Current Status</h6>
+                <div class="d-flex align-items-center">
+                    <% if (website.last_status === 'up') { %>
+                        <div class="bg-success bg-opacity-10 p-3 rounded me-3">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <h4 class="mb-0 text-success">Up</h4>
+                    <% } else if (website.last_status === 'down') { %>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded me-3">
+                            <i class="fas fa-times-circle fa-2x text-danger"></i>
+                        </div>
+                        <h4 class="mb-0 text-danger">Down</h4>
+                    <% } else { %>
+                        <div class="bg-secondary bg-opacity-10 p-3 rounded me-3">
+                            <i class="fas fa-question-circle fa-2x text-secondary"></i>
+                        </div>
+                        <h4 class="mb-0 text-secondary">Unknown</h4>
+                    <% } %>
+                </div>
+                <p class="text-muted mt-2 mb-0">
+                    <small>Last checked: <%= website.last_check_time ? moment(website.last_check_time).format('MMM D, YYYY HH:mm:ss') : 'Never' %></small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Uptime</h6>
+                <div class="d-flex align-items-center">
+                    <div class="bg-info bg-opacity-10 p-3 rounded me-3">
+                        <i class="fas fa-chart-line fa-2x text-info"></i>
+                    </div>
+                    <h4 class="mb-0"><%= uptime.toFixed(2) %>%</h4>
+                </div>
+                <p class="text-muted mt-2 mb-0">
+                    <small>Last 24 hours</small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Response Time</h6>
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 p-3 rounded me-3">
+                        <i class="fas fa-tachometer-alt fa-2x text-warning"></i>
+                    </div>
+                    <h4 class="mb-0"><%= avgResponseTime ? Math.round(avgResponseTime) : 'N/A' %> <small>ms</small></h4>
+                </div>
+                <p class="text-muted mt-2 mb-0">
+                    <small>Average (last 24 hours)</small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-2">Monitoring</h6>
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                        <i class="fas fa-clock fa-2x text-primary"></i>
+                    </div>
+                    <h4 class="mb-0"><%= website.check_interval %> <small>min</small></h4>
+                </div>
+                <p class="text-muted mt-2 mb-0">
+                    <small>Check interval</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white p-0">
+        <ul class="nav nav-tabs" id="websiteTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="checks-tab" data-bs-toggle="tab" data-bs-target="#checks" type="button" role="tab" aria-controls="checks" aria-selected="true">
+                    <i class="fas fa-history me-2"></i>Recent Checks
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="uptime-tab" data-bs-toggle="tab" data-bs-target="#uptime" type="button" role="tab" aria-controls="uptime" aria-selected="false">
+                    <i class="fas fa-chart-line me-2"></i>Uptime
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="response-tab" data-bs-toggle="tab" data-bs-target="#response" type="button" role="tab" aria-controls="response" aria-selected="false">
+                    <i class="fas fa-tachometer-alt me-2"></i>Response Time
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">
+                    <i class="fas fa-cog me-2"></i>Settings
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="websiteTabsContent">
+            <!-- Recent Checks Tab -->
+            <div class="tab-pane fade show active" id="checks" role="tabpanel" aria-labelledby="checks-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Recent Checks</h5>
+                    <div class="btn-group">
+                        <a href="/websites/<%= website.id %>/checks?timeRange=24h" class="btn btn-sm btn-outline-secondary <%= timeRange === '24h' ? 'active' : '' %>">24h</a>
+                        <a href="/websites/<%= website.id %>/checks?timeRange=7d" class="btn btn-sm btn-outline-secondary <%= timeRange === '7d' ? 'active' : '' %>">7d</a>
+                        <a href="/websites/<%= website.id %>/checks?timeRange=30d" class="btn btn-sm btn-outline-secondary <%= timeRange === '30d' ? 'active' : '' %>">30d</a>
+                    </div>
+                </div>
+                
+                <% if (checks.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Response Time</th>
+                                    <th>Status Code</th>
+                                    <th>Error</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% checks.forEach(check => { %>
+                                    <tr>
+                                        <td><%= moment(check.check_time).format('MMM D, YYYY HH:mm:ss') %></td>
+                                        <td>
+                                            <% if (check.status === 'up') { %>
+                                                <span class="badge bg-success">Up</span>
+                                            <% } else { %>
+                                                <span class="badge bg-danger">Down</span>
+                                            <% } %>
+                                        </td>
+                                        <td><%= check.response_time ? `${check.response_time}ms` : 'N/A' %></td>
+                                        <td><%= check.status_code || 'N/A' %></td>
+                                        <td><%= check.error_message || '-' %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <% if (pagination.totalPages > 1) { %>
+                        <nav aria-label="Checks pagination">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item <%= pagination.currentPage === 1 ? 'disabled' : '' %>">
+                                    <a class="page-link" href="/websites/<%= website.id %>/checks?page=<%= pagination.currentPage - 1 %>&timeRange=<%= timeRange %>">Previous</a>
+                                </li>
+                                
+                                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                                    <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+                                        <a class="page-link" href="/websites/<%= website.id %>/checks?page=<%= i %>&timeRange=<%= timeRange %>"><%= i %></a>
+                                    </li>
+                                <% } %>
+                                
+                                <li class="page-item <%= pagination.currentPage === pagination.totalPages ? 'disabled' : '' %>">
+                                    <a class="page-link" href="/websites/<%= website.id %>/checks?page=<%= pagination.currentPage + 1 %>&timeRange=<%= timeRange %>">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    <% } %>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <h5>No checks found</h5>
+                        <p class="text-muted">There are no checks for this website in the selected time range.</p>
+                        <a href="/websites/check/<%= website.id %>" class="btn btn-primary mt-2">
+                            <i class="fas fa-sync me-2"></i>Check Now
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Uptime Tab -->
+            <div class="tab-pane fade" id="uptime" role="tabpanel" aria-labelledby="uptime-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Uptime History</h5>
+                    <div class="btn-group">
+                        <a href="/websites/<%= website.id %>?tab=uptime&timeRange=24h" class="btn btn-sm btn-outline-secondary <%= timeRange === '24h' ? 'active' : '' %>">24h</a>
+                        <a href="/websites/<%= website.id %>?tab=uptime&timeRange=7d" class="btn btn-sm btn-outline-secondary <%= timeRange === '7d' ? 'active' : '' %>">7d</a>
+                        <a href="/websites/<%= website.id %>?tab=uptime&timeRange=30d" class="btn btn-sm btn-outline-secondary <%= timeRange === '30d' ? 'active' : '' %>">30d</a>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">Uptime</h6>
+                                <div class="display-4 fw-bold text-success mb-2"><%= uptime.toFixed(2) %>%</div>
+                                <p class="text-muted mb-0">Last <%= timeRange === '24h' ? '24 hours' : timeRange === '7d' ? '7 days' : '30 days' %></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">Outages</h6>
+                                <div class="display-4 fw-bold mb-2"><%= stats.outages || 0 %></div>
+                                <p class="text-muted mb-0">Total outages</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">Downtime</h6>
+                                <div class="display-4 fw-bold mb-2"><%= stats.downtime || '0m' %></div>
+                                <p class="text-muted mb-0">Total downtime</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <canvas id="uptimeChart" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="/reports/uptime/<%= website.id %>" class="btn btn-primary">
+                        <i class="fas fa-chart-line me-2"></i>View Detailed Uptime Report
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Response Time Tab -->
+            <div class="tab-pane fade" id="response" role="tabpanel" aria-labelledby="response-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Response Time History</h5>
+                    <div class="btn-group">
+                        <a href="/websites/<%= website.id %>?tab=response&timeRange=24h" class="btn btn-sm btn-outline-secondary <%= timeRange === '24h' ? 'active' : '' %>">24h</a>
+                        <a href="/websites/<%= website.id %>?tab=response&timeRange=7d" class="btn btn-sm btn-outline-secondary <%= timeRange === '7d' ? 'active' : '' %>">7d</a>
+                        <a href="/websites/<%= website.id %>?tab=response&timeRange=30d" class="btn btn-sm btn-outline-secondary <%= timeRange === '30d' ? 'active' : '' %>">30d</a>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">Average</h6>
+                                <div class="display-4 fw-bold text-warning mb-2"><%= avgResponseTime ? Math.round(avgResponseTime) : 'N/A' %> <small class="fs-6">ms</small></div>
+                                <p class="text-muted mb-0">Average response time</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">Minimum</h6>
+                                <div class="display-4 fw-bold mb-2"><%= stats.minResponseTime || 'N/A' %> <small class="fs-6">ms</small></div>
+                                <p class="text-muted mb-0">Fastest response</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">Maximum</h6>
+                                <div class="display-4 fw-bold mb-2"><%= stats.maxResponseTime || 'N/A' %> <small class="fs-6">ms</small></div>
+                                <p class="text-muted mb-0">Slowest response</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <canvas id="responseTimeChart" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="/reports/response-time/<%= website.id %>" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt me-2"></i>View Detailed Response Time Report
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Website Settings</h5>
+                    <a href="/websites/edit/<%= website.id %>" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Settings
+                    </a>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0">General Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 40%">Name</th>
+                                            <td><%= website.name %></td>
+                                        </tr>
+                                        <tr>
+                                            <th>URL</th>
+                                            <td>
+                                                <a href="<%= website.url %>" target="_blank" class="text-decoration-none">
+                                                    <%= website.url %>
+                                                    <i class="fas fa-external-link-alt fa-xs ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <td>
+                                                <% if (website.is_active) { %>
+                                                    <span class="badge bg-success">Active</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Created</th>
+                                            <td><%= moment(website.created_at).format('MMM D, YYYY HH:mm') %></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0">Monitoring Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 40%">Check Interval</th>
+                                            <td><%= website.check_interval %> minutes</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Expected Status Code</th>
+                                            <td><%= website.expected_status_code %></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Timeout</th>
+                                            <td><%= website.timeout %> seconds</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Alert Threshold</th>
+                                            <td><%= website.alert_threshold %> consecutive failures</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0">Notification Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 40%">Email Alerts</th>
+                                            <td>
+                                                <% if (website.alert_email) { %>
+                                                    <span class="badge bg-success">Enabled</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-secondary">Disabled</span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Notes</h6>
+                    </div>
+                    <div class="card-body">
+                        <% if (website.notes) { %>
+                            <p class="mb-0"><%= website.notes %></p>
+                        <% } else { %>
+                            <p class="text-muted mb-0">No notes available.</p>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mt-4 border-danger">
+                    <div class="card-header bg-white text-danger">
+                        <h6 class="mb-0">Danger Zone</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6>Delete this website</h6>
+                                <p class="text-muted mb-0">Once you delete a website, there is no going back. All monitoring data will be permanently deleted.</p>
+                            </div>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                Delete Website
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete <strong><%= website.name %></strong>?</p>
+                                <p class="text-danger">This action cannot be undone. All monitoring data for this website will be permanently deleted.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="/websites/delete/<%= website.id %>" method="POST">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- contentFor('extraJS') %>
+<script>
+    // Set active tab based on URL parameter
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        
+        if (tab) {
+            const tabElement = document.querySelector(`#${tab}-tab`);
+            if (tabElement) {
+                const tabTrigger = new bootstrap.Tab(tabElement);
+                tabTrigger.show();
+            }
+        }
+    });
+    
+    // Uptime Chart
+    const uptimeCtx = document.getElementById('uptimeChart').getContext('2d');
+    const uptimeChart = new Chart(uptimeCtx, {
+        type: 'line',
+        data: {
+            labels: <%- JSON.stringify(chartData.labels) %>,
+            datasets: [{
+                label: 'Uptime %',
+                data: <%- JSON.stringify(chartData.uptime) %>,
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 2,
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Uptime: ${context.raw}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Response Time Chart
+    const responseCtx = document.getElementById('responseTimeChart').getContext('2d');
+    const responseChart = new Chart(responseCtx, {
+        type: 'line',
+        data: {
+            labels: <%- JSON.stringify(chartData.labels) %>,
+            datasets: [{
+                label: 'Response Time (ms)',
+                data: <%- JSON.stringify(chartData.responseTimes) %>,
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                borderColor: 'rgba(255, 193, 7, 1)',
+                borderWidth: 2,
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Response Time: ${context.raw}ms`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + 'ms';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script> 

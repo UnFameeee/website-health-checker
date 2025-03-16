@@ -1,0 +1,131 @@
+<!-- Edit Website Page -->
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Edit Website</h1>
+    <a href="/websites" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Back to Websites
+    </a>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-danger" role="alert">
+      <%= error %>
+    </div>
+  <% } %>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Website Information</h6>
+        </div>
+        <div class="card-body">
+          <form action="/websites/update/<%= website.id %>" method="POST">
+            <div class="mb-3">
+              <label for="name" class="form-label">Website Name *</label>
+              <input type="text" class="form-control" id="name" name="name" value="<%= website.name %>" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="url" class="form-label">URL *</label>
+              <input type="url" class="form-control" id="url" name="url" value="<%= website.url %>" required>
+              <small class="form-text text-muted">Include http:// or https://</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="checkInterval" class="form-label">Check Interval (minutes)</label>
+              <input type="number" class="form-control" id="checkInterval" name="checkInterval" value="<%= website.check_interval %>" min="1" max="60">
+              <small class="form-text text-muted">How often to check the website (1-60 minutes)</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="expectedStatusCode" class="form-label">Expected Status Code</label>
+              <input type="number" class="form-control" id="expectedStatusCode" name="expectedStatusCode" value="<%= website.expected_status_code %>" min="100" max="599">
+              <small class="form-text text-muted">HTTP status code expected from the website (default: 200)</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="timeout" class="form-label">Timeout (seconds)</label>
+              <input type="number" class="form-control" id="timeout" name="timeout" value="<%= website.timeout %>" min="1" max="30">
+              <small class="form-text text-muted">How long to wait for a response before timing out (1-30 seconds)</small>
+            </div>
+            
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="isActive" name="isActive" <%= website.is_active ? 'checked' : '' %>>
+              <label class="form-check-label" for="isActive">Active Monitoring</label>
+              <small class="form-text text-muted d-block">Enable/disable monitoring for this website</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="alertThreshold" class="form-label">Alert Threshold</label>
+              <input type="number" class="form-control" id="alertThreshold" name="alertThreshold" value="<%= website.alert_threshold %>" min="1" max="10">
+              <small class="form-text text-muted">Number of consecutive failed checks before sending an alert</small>
+            </div>
+            
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="alertEmail" name="alertEmail" <%= website.alert_email ? 'checked' : '' %>>
+              <label class="form-check-label" for="alertEmail">Email Alerts</label>
+              <small class="form-text text-muted d-block">Send email alerts when website is down</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="notes" name="notes" rows="3"><%= website.notes %></textarea>
+              <small class="form-text text-muted">Optional notes about this website</small>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Website
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Current Status</h6>
+        </div>
+        <div class="card-body">
+          <div class="text-center mb-3">
+            <% if (website.last_status === 'up') { %>
+              <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                <i class="fas fa-check-circle fa-3x text-success"></i>
+              </div>
+              <h5 class="text-success">Up and Running</h5>
+            <% } else if (website.last_status === 'down') { %>
+              <div class="bg-danger bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                <i class="fas fa-times-circle fa-3x text-danger"></i>
+              </div>
+              <h5 class="text-danger">Down</h5>
+            <% } else { %>
+              <div class="bg-secondary bg-opacity-10 p-3 rounded-circle d-inline-block mb-2">
+                <i class="fas fa-question-circle fa-3x text-secondary"></i>
+              </div>
+              <h5 class="text-secondary">Unknown</h5>
+            <% } %>
+          </div>
+          
+          <div class="mb-3">
+            <p class="mb-1"><strong>Last Checked:</strong></p>
+            <p><%= website.last_check_time ? moment(website.last_check_time).format('MMM D, YYYY HH:mm:ss') : 'Never' %></p>
+          </div>
+          
+          <div class="mb-3">
+            <p class="mb-1"><strong>Uptime:</strong></p>
+            <p><%= website.uptime ? website.uptime.toFixed(2) + '%' : 'N/A' %></p>
+          </div>
+          
+          <div class="d-grid">
+            <a href="/websites/<%= website.id %>" class="btn btn-info">
+              <i class="fas fa-chart-line"></i> View Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
